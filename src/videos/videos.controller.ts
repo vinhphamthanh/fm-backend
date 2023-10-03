@@ -2,6 +2,7 @@ import {
 	Body,
 	Controller,
 	Get,
+	NotFoundException,
 	Post,
 } from '@nestjs/common';
 import axios from 'axios';
@@ -20,7 +21,7 @@ export class VideosController {
 	@Post('/share')
 	async shareYoutube(@Body() body: { youtubeId: string, email: string }) {
 		const { youtubeId, email } = body
-		// check here for video existing....
+		// TODO: check here for video existing....
 		const options = {
 			method: 'GET',
 			url: 'https://youtube-v31.p.rapidapi.com/videos',
@@ -36,8 +37,8 @@ export class VideosController {
 		try {
 			const response = await axios.request(options);
 			const { data } = response || {};
-			console.log('--------> ', data.items[0])
-			if (data.items) {
+			console.log('response for none-existing --> ', response.data);
+			if (data.items?.length > 0) {
 				const title = data.items[0]?.snippet?.title;
 				const description = data.items[0]?.snippet?.description;
 				const shareData: VideoDto = {
@@ -49,7 +50,12 @@ export class VideosController {
 					dislikes: '',
 				};
 
-				await this.videosService.create(shareData);
+				return await this.videosService.create(shareData);
+			} else {
+				return {
+					status: 404,
+					message: 'Video not found!'
+				}
 			}
 		} catch (error) {
 			console.error(error);

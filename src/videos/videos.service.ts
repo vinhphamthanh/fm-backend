@@ -16,12 +16,20 @@ export class VideosService {
 		const video = await this.repo.findOne({ where: { youtubeId } });
 
 		if (video) {
-			throw new BadRequestException('Video already shared!')
+			return {
+				status: 409,
+				message: 'Video already shared!'
+			}
 		}
 
 		const newVideo = this.repo.create(data);
 
-		return this.repo.save(newVideo);
+		await this.repo.save(newVideo);
+
+		return {
+			status: 201,
+			message: 'Sharing video successfully!'
+		}
 	}
 
 	findAll() {
