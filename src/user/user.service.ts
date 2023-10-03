@@ -1,15 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Users } from './users.entity';
-import { UserDto } from './dtos/user.dto';
 import {
 	randomBytes,
 	scrypt as _scrypt,
 } from 'crypto';
-import { promisify } from 'util'
+import { Repository } from 'typeorm';
+import { promisify } from 'util';
+import { UserDto } from './dtos/user.dto';
+import { Users } from './users.entity';
 
-const scrypt = promisify(_scrypt)
+const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class UserService {
@@ -17,10 +20,10 @@ export class UserService {
 
 	async register(data: UserDto) {
 		const { email, password } = data;
-		const verifyingUser = await this.repo.findOne({ where: { email }})
+		const verifyingUser = await this.repo.findOne({ where: { email } });
 
 		if (verifyingUser) {
-			throw new BadRequestException('This email already registered.')
+			throw new BadRequestException('This email already registered.');
 		}
 
 		const salt = randomBytes(8).toString('hex');
@@ -28,20 +31,20 @@ export class UserService {
 		const hashPassword = `${salt}.${hash.toString('hex')}`;
 		const newData = {
 			email,
-			password: hashPassword
-		}
+			password: hashPassword,
+		};
 
 		const newUser = this.repo.create(newData);
 
-		return this.repo.save(newUser)
+		return this.repo.save(newUser);
 	}
 
 	async login(data: UserDto) {
-		const { email, password } = data
-		const verifyingUser = await this.repo.findOne({ where: { email }})
+		const { email, password } = data;
+		const verifyingUser = await this.repo.findOne({ where: { email } });
 
 		if (!verifyingUser) {
-			return this.register(data)
+			return this.register(data);
 		}
 
 		const [salt, storedHash] = verifyingUser.password.split('.');
@@ -55,11 +58,11 @@ export class UserService {
 	}
 
 	async delete(email: string) {
-		const user = await this.repo.findOne({ where: { email }})
+		const user = await this.repo.findOne({ where: { email } });
 		if (!user) {
-			throw new BadRequestException('User not exist')
+			throw new BadRequestException('User not exist');
 		}
 
-		return this.repo.remove(user)
+		return this.repo.remove(user);
 	}
 }

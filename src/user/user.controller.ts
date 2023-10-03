@@ -6,8 +6,8 @@ import {
 	Post,
 } from '@nestjs/common';
 import { SerializeDecorator } from '../interceptors-decorators/serialize.decorator';
-import { UserDto } from './dtos/user.dto';
 import { AuthDto } from './dtos/auth.dto';
+import { UserDto } from './dtos/user.dto';
 import { UserService } from './user.service';
 
 @Controller('')
